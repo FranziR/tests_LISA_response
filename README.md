@@ -11,8 +11,8 @@ We want to compare different LISA response functions. In particular we want to c
 ### 1. Regenerating LDC data
 
 - `src/ldc_code.c` and `src/ldc_code.h` replicate the large LDC implementation of FastGB
-- run `make` in command line to compile C code &rarr; `ldc_exe` is generated
-- run `./ldc_exe M` to simulate `M` signals --> random parameters and TDIs are generated (stored in `matlab/parameters.bin`, `matlab/X.bin`, `matlab/Y.bin`, `matlab/Z.bin`)
+- run `make` in command line to compile C code **&rarr;** `ldc_exe` is generated
+- run `./ldc_exe M` to simulate `M` signals **&rarr;** random parameters and TDIs are generated (stored in `matlab/parameters.bin`, `matlab/X.bin`, `matlab/Y.bin`, `matlab/Z.bin`)
 
 ### 2.+3. Comparing to reference implementation and TLA
 
@@ -22,5 +22,5 @@ We want to compare different LISA response functions. In particular we want to c
 
 # Comments
 
-- all signals are generated with carrier frequency $10^{-3}$
+- all signals are generated with carrier frequency 0.001 Hz
 - before generating new data with `ldc_exe`, the files `matlab/X.bin`, `matlab/Y.bin`, `matlab/Z.bin` and `matlab/parameters.bin` have to be deleted (in `scr/ldc_code.c` the data is continuously appended to the files)
