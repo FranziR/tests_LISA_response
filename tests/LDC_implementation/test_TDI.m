@@ -6,7 +6,7 @@ M=25;
 for jj=1:2
     for ii=1:3
         clf
-        figure(10)
+        figure(1)
         err=norm(YYLDC(:,ii,jj)-YY(:,ii,jj),'fro')/norm(YYLDC(:,ii,jj),'fro');
 
         subplot(3,1,1)
