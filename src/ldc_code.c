@@ -46,11 +46,10 @@ void generateParameters(double *parameters, double freq0, double T){
 		datatmp[4]=2*PI*(double)(rand()/ (double)(RAND_MAX));
 		datatmp[5]=freq0+2e-6*(double)(rand()/ (double)(RAND_MAX))-1e-6;
 		datatmp[6]=2*PI*(double)(rand()/ (double)(RAND_MAX));
-		// datatmp[7]=2e-19*(double)(rand()/ (double)(RAND_MAX))-1e-19;
-		datatmp[7]=0;
+		datatmp[7]=2e-19*(double)(rand()/ (double)(RAND_MAX))-1e-19;
 
 		parameters[0]=datatmp[5]*T; // frequency
-		parameters[7]=datatmp[7]*T*T; // freqdot
+		parameters[7]=datatmp[7]*T*T; // frequency dot
 		parameters[1]=cos(PI/2-datatmp[1]); // cos(theta) i.e. cos(pi/2-beta)
 		parameters[2]=datatmp[0]; // phi i.e. lambda
 		parameters[3]=log(datatmp[3]); // amplitude
@@ -58,11 +57,10 @@ void generateParameters(double *parameters, double freq0, double T){
 		parameters[5]=datatmp[2]; // psi
 		parameters[6]=-1*datatmp[6]; // phi_0
 
-		FILE *ptrpara=fopen("/home/franzi/home/franzi/Documents/01_Code/05_LDC/ldc_waveform_generation/matlab/parameters.bin","ab");
+		FILE *ptrpara=fopen("matlab/parameters.bin","ab");
 		for(int ii=0; ii<NUM_PARAMETERS_GALBIN; ii++){
 			fwrite(&datatmp[ii], sizeof(double), 1, ptrpara);
 		}
-
 		fclose(ptrpara);
 }
 
@@ -75,7 +73,7 @@ void Fast_GB(double *params, struct Waveform* wfm, long N, double T, double *XSL
 
 	struct LISA *lisa = (struct LISA*) malloc(sizeof(struct LISA));
 	init_lisa(lisa, orbit_params[0], orbit_params[1], orbit_params[2]);
-	double fstar = (CLIGHT/lisa->spacecraft_separation)/(2*PI); //0.01908538063694777;
+	double fstar = (CLIGHT/lisa->spacecraft_separation)/(2*PI);
 
 	wfm->N  = N; // set number of samples
 	wfm->T  = T; // set observation period
@@ -109,9 +107,10 @@ void calc_xi_f(struct Waveform *wfm, struct LISA* lisa, double fstar, double t)
 {
 	long i;
 
-	double f0;
+	double f0, dfdt_0;
 
 	f0       = wfm->params[0]/wfm->T;
+	dfdt_0   = wfm->params[7]/wfm->T/wfm->T;
 
 	// Calculate position of each spacecraft at time t
 	for(i=0; i<3; i++){
@@ -124,7 +123,7 @@ void calc_xi_f(struct Waveform *wfm, struct LISA* lisa, double fstar, double t)
 	{
 		wfm->kdotx[i] = (wfm->x[i]*wfm->k[0] + wfm->y[i]*wfm->k[1] + wfm->z[i]*wfm->k[2])/CLIGHT;
 		wfm->xi[i]    = t - wfm->kdotx[i]; //Wave arrival time at spacecraft i
-		wfm->f[i]     = f0; //First order approximation to frequency at spacecraft i
+		wfm->f[i]     = f0+dfdt_0*wfm->xi[i];; //First order approximation to frequency at spacecraft i
 		wfm->fonfs[i] = wfm->f[i]/fstar; //Ratio of true frequency to transfer frequency
 	}
 
@@ -473,7 +472,6 @@ void calc_sep_vecs(struct Waveform *wfm, double Larm)
 		wfm->r31[i] = -wfm->r13[i];
 		wfm->r32[i] = -wfm->r23[i];
 	}
-
 	return;
 }
 
@@ -592,11 +590,10 @@ void get_transfer(struct Waveform *wfm, double t)
 	double tran2r, tran2i;
 	double aevol;			// amplitude evolution factor
 	double arg1, arg2, sinc;
-	double f0;
-	double df, phi0;
+	double f0, dfdt_0, df, phi0;
 
 	f0       = wfm->params[0]/wfm->T;
-	// printf("\n params[0]=%f, f0=%f , q=%ld", wfm->params[0], wfm->params[0]/wfm->T, wfm->q);
+	dfdt_0   = wfm->params[7]/wfm->T/wfm->T;
 	phi0     = wfm->params[6];
 
 	q  = wfm->q;
@@ -608,22 +605,16 @@ void get_transfer(struct Waveform *wfm, double t)
 		{
 			if(i!=j)
 			{
-				//Argument of transfer function
-				arg1 = 0.5*wfm->fonfs[i]*(1. + wfm->kdotr[i][j]);
-				//Argument of complex exponentials
-				arg2 =  PI*2*f0*wfm->xi[i] + phi0 - df*t;
-				//Transfer function
-				sinc = 0.25*sin(arg1)/arg1;
-				//Evolution of amplitude
-				aevol = 1.0;
-				///Real and imaginary pieces of time series (no complex exponential)
-				tran1r = aevol*(wfm->dplus[i][j]*wfm->DPr + wfm->dcross[i][j]*wfm->DCr);
+				
+				arg1 = 0.5*wfm->fonfs[i]*(1. + wfm->kdotr[i][j]); //Argument of transfer function
+				arg2 =  PI*2*f0*wfm->xi[i] + phi0 - df*t+M_PI*dfdt_0*wfm->xi[i]*wfm->xi[i]; //Argument of complex exponentials
+				sinc = 0.25*sin(arg1)/arg1; //Transfer function
+				aevol = 1.0; //Evolution of amplitude
+				tran1r = aevol*(wfm->dplus[i][j]*wfm->DPr + wfm->dcross[i][j]*wfm->DCr); ///Real and imaginary pieces of time series (no complex exponential)
 				tran1i = aevol*(wfm->dplus[i][j]*wfm->DPi + wfm->dcross[i][j]*wfm->DCi);
-				//Real and imaginry components of complex exponential
-				tran2r = cos(arg1 + arg2);
+				tran2r = cos(arg1 + arg2); //Real and imaginry components of complex exponential
 				tran2i = sin(arg1 + arg2);
-				//Real & Imaginary part of the slowly evolving signal
-				wfm->TR[i][j] = sinc*(tran1r*tran2r - tran1i*tran2i);
+				wfm->TR[i][j] = sinc*(tran1r*tran2r - tran1i*tran2i); //Real & Imaginary part of the slowly evolving signal
 				wfm->TI[i][j] = sinc*(tran1r*tran2i + tran1i*tran2r);
 			}
 		}
@@ -694,47 +685,26 @@ void XYZ(double ***d, double f0, long q, long M, double T, double Larm, double f
 		ZZ[2*i]   =  2.0*fonfs*(Z[2*i]*cSL - Z[2*i+1]*sSL);
 		ZZ[2*i+1] =  2.0*fonfs*(Z[2*i]*sSL + Z[2*i+1]*cSL);
 	
-		FILE *ptrXSL=fopen("/home/franzi/home/franzi/Documents/01_Code/05_LDC/ldc_waveform_generation/matlab/X.bin","ab");
+		FILE *ptrXSL=fopen("matlab/X.bin","ab");
 		double tmpRSL=XX[2*i];
 		double tmpISL=XX[2*i+1];
 		fwrite(&tmpRSL, sizeof(double), 1, ptrXSL);
 		fwrite(&tmpISL, sizeof(double), 1, ptrXSL);
 		fclose(ptrXSL);
 
-		FILE *ptrYSL=fopen("/home/franzi/home/franzi/Documents/01_Code/05_LDC/ldc_waveform_generation/matlab/Y.bin","ab");
+		FILE *ptrYSL=fopen("matlab/Y.bin","ab");
 		tmpRSL=YY[2*i];
 		tmpISL=YY[2*i+1];
 		fwrite(&tmpRSL, sizeof(double), 1, ptrYSL);
 		fwrite(&tmpISL, sizeof(double), 1, ptrYSL);
 		fclose(ptrYSL);
 
-		FILE *ptrZSL=fopen("/home/franzi/home/franzi/Documents/01_Code/05_LDC/ldc_waveform_generation/matlab/Z.bin","ab");
+		FILE *ptrZSL=fopen("matlab/Z.bin","ab");
 		tmpRSL=ZZ[2*i];
 		tmpISL=ZZ[2*i+1];
 		fwrite(&tmpRSL, sizeof(double), 1, ptrZSL);
 		fwrite(&tmpISL, sizeof(double), 1, ptrZSL);
 		fclose(ptrZSL);
-
-		// FILE *ptrX=fopen("/home/franzi/home/franzi/Documents/01_Code/05_LDC/ldc_waveform_generation/matlab/X.bin","ab");
-		// double tmpR=X[2*i];
-		// double tmpI=X[2*i+1];
-		// fwrite(&tmpR, sizeof(double), 1, ptrX);
-		// fwrite(&tmpI, sizeof(double), 1, ptrX);
-		// fclose(ptrX);
-
-		// FILE *ptrY=fopen("/home/franzi/home/franzi/Documents/01_Code/05_LDC/ldc_waveform_generation/matlab/Y.bin","ab");
-		// tmpR=Y[2*i];
-		// tmpI=Y[2*i+1];
-		// fwrite(&tmpR, sizeof(double), 1, ptrY);
-		// fwrite(&tmpI, sizeof(double), 1, ptrY);
-		// fclose(ptrY);
-
-		// FILE *ptrZ=fopen("/home/franzi/home/franzi/Documents/01_Code/05_LDC/ldc_waveform_generation/matlab/Z.bin","ab");
-		// tmpR=Z[2*i];
-		// tmpI=Z[2*i+1];
-		// fwrite(&tmpR, sizeof(double), 1, ptrZ);
-		// fwrite(&tmpI, sizeof(double), 1, ptrZ);
-		// fclose(ptrZ);
 	}
 
 	free(X); free(XX);
