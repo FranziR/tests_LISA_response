@@ -17,7 +17,7 @@ int main( int argc, const char* argv[] ){
 	int n_waves; 
 	n_waves=(int)atoi(argv[1]);
 
-	int N =32768;
+	int N =1024;
 	
 	for(int nn=0; nn<n_waves; nn++){
 		printf("n_waves= %d\n ", nn);

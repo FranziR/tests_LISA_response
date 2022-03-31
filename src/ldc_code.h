@@ -14,8 +14,7 @@
 #define NUM_PARAMETERS_GALBIN 8
 #define ECCENTRICITY 0.0048241852
 #define INTER_SPACECRAFT_PHASE 2 * M_PI / 3
-// #define TOBS 33554432
-#define TOBS 365*60*60*24*2
+#define TOBS 33554432
 
 void Fast_GB(double *params, struct Waveform* wfm, long N, double Tobs, double *XSL, double *YSL, double *ZSL, int NP);
 void calc_xi_f(struct Waveform *wfm, struct LISA* lisa, double fstar, double t);
