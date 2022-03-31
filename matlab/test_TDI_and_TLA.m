@@ -1,4 +1,4 @@
-clear; clc; %clf
+clear; clc; clf
 %% Read in FastGB data
 [YYFFT, parameters, tDS]=read_data();
 T=max(tDS)+(tDS(2)-tDS(1));
@@ -103,7 +103,7 @@ end
 
 
 function [YY, parameters, t]=read_data()
-    Tobs=33554432; N=32768; dt=Tobs/N; t=(0:dt:Tobs-dt)';
+    Tobs=33554432; N=1024; dt=Tobs/N; t=(0:dt:Tobs-dt)';
 
     file_path = fileparts(mfilename('fullpath'));
 
