@@ -12,7 +12,7 @@ See this [overleaf project](https://www.overleaf.com/7991759222vwgznwfvddfm) for
 
 ### 1. Replicating LDC data
 
-- run `make` in command line to compile C code (`src/ldc_code.c` and `src/ldc_code.h` replicate the large LDC implementation of FastGB)
+- run `make` in command line to compile C code (`src/ldc_code.c` and `src/ldc_code.h` replicate the large LDC implementation of FastGB, g++ compiler)
   <br /> **&rarr;** `ldc_exe` is generated
 - run `./ldc_exe M` to simulate `M` signals
   <br /> **&rarr;** random parameters and TDIs are generated (stored in `matlab/parameters.bin`, `matlab/X.bin`, `matlab/Y.bin`, `matlab/Z.bin`)
