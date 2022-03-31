@@ -25,5 +25,6 @@ See this [overleaf project](https://www.overleaf.com/7991759222vwgznwfvddfm) for
 
 # Comments
 
+- match between original LDC implementation and its replication (`scr/ldc_code.c`) is approximately 10^-8
 - all signals are generated with carrier frequency 0.001 Hz
 - before generating new data with `ldc_exe`, the files `matlab/X.bin`, `matlab/Y.bin`, `matlab/Z.bin` and `matlab/parameters.bin` have to be deleted (in `scr/ldc_code.c` the data is continuously appended to the files)
