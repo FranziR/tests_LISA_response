@@ -1,12 +1,9 @@
-function [Y, dApsi, phaseShift, xi, ep, ec]=lisa_gen_events_modified(t,ps,n,L,parameters,freq0)
+function [Y]=lisa_gen_events_modified(t,ps,n,L,parameters,freq0)
 ps=ps./299792458;
 L=L./299792458;
 
 M=size(parameters,1);
 Yall=zeros(length(t),6,M);
-phaseShiftAll=zeros(length(t),6,M);
-dApsiAll=zeros(length(t),6,M);
-xiAll=zeros(length(t),6,M);
 
 for m=1:M
     lambda=parameters(m,1);
@@ -23,7 +20,7 @@ for m=1:M
     k(2)=-cos(beta)*sin(lambda);
     k(3)=-sin(beta);
     
-    [Ep, Ec, ep ,ec]=get_polarization_tensors(lambda, beta, psi);
+    [Ep, Ec]=get_polarization_tensors(lambda, beta, psi);
     
     y=zeros(length(t),6);
     dApsi=zeros(length(t),6);
@@ -45,18 +42,12 @@ for m=1:M
         xi(:, jord)=(t-ps(:,:,jord)*k(:));
    end
     Yall(:,:,m)=y;
-    dApsiAll(:,:,m)=dApsi;
-    phaseShiftAll(:,:,m)=phaseShift;
-    xiAll(:,:,m)=xi;
 end
 Y=Yall;
-phaseShift=phaseShiftAll;
-dApsi=dApsiAll;
-xi=xiAll;
 end
 
 
-function [Ep, Ec, ep ,ec]=get_polarization_tensors(la, be, psi)
+function [Ep, Ec]=get_polarization_tensors(la, be, psi)
     ep=-1.*[sin(be)^2*cos(la)^2-sin(la)^2 0.5*sin(2*la)*(1+sin(be)^2) -0.5*sin(2*be)*cos(la); ...
         0.5*sin(2*la)*(1+sin(be)^2) sin(be)^2*sin(la)^2-cos(la)^2 -0.5*sin(2*be)*sin(la);...
         -0.5*sin(2*be)*cos(la) -0.5*sin(2*be)*sin(la) cos(be)^2];
