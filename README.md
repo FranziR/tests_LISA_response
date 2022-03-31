@@ -19,7 +19,7 @@ See this [overleaf project](https://www.overleaf.com/7991759222vwgznwfvddfm) for
 
 ### 2.+3. Comparing to reference implementation and TLA
 
-- script `matlab/test_TLA.m` compares the generated LDC data to ...
+- script `matlab/test_TDI_and_TLA.m` compares the generated LDC data to ...
   - ... our reference model (adapted to LDC implementation of FastGB)
   - ... TLA (adapted to LDC implementation of FastGB)
 
