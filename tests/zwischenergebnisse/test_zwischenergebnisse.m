@@ -5,7 +5,7 @@ T=max(tDS)+(tDS(2)-tDS(1));
 freq0=floor(parameters(:,6).*T)./T;
 %% Generate analytic model data
 [pr_,ps_,n_,L]=lisa_geometry_modified(tDS);
-[YY_, dApsi_, phaseShift_, xi_, ep_, ec_]=lisa_gen_events_modified(tDS,pr_,ps_,n_,L,parameters,freq0);
+[YY_, dApsi_, phaseShift_, xi_, ep_, ec_]=lisa_gen_events_modified(tDS,ps_,n_,L,parameters,freq0);
 %% Compare
 M=numel(parameters)/8;
 freqs=(-numel(tDS)/2:numel(tDS)/2-1)./T;
