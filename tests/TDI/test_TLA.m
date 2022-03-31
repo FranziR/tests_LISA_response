@@ -1,14 +1,13 @@
 clear; clc; clf
 %% Read in FastGB data
-[~, YYFFT, parameters, tDS]=read_data();
+[YYFFT, parameters, tDS]=read_data();
 T=max(tDS)+(tDS(2)-tDS(1));
-freq0=floor(parameters(6).*T)./T;
+freq0=floor(parameters(:,6).*T)./T;
 M=1;
 %% Generate analytic model data
 [pr,ps,n,L]=lisa_geometry_modified(tDS);
 [~, YYFFT_,E,k,h,fctr]=lisa_gen_events_modified(tDS,pr,ps,n,L,parameters,freq0,T);
-YY_=ifft(ifftshift(YYFFT_,1),[],1);
-%% Generate TLA
+%% Generate TL
 ZZ_=zeros(length(tDS),3,M);
 for m=1:M
     A=get_A_LDC(freq0(m),pr,n,L);
@@ -69,20 +68,19 @@ for jj=1:1
     end
 end
 %% functions
-function [YY, YYSL, parameters, t]=read_data()
+function [YY, parameters, t]=read_data()
     Tobs=33554432;
     N=1024; 
     dt=Tobs/N;
     t=(0:dt:Tobs-dt)';
 
     file_path = fileparts(mfilename('fullpath'));
-    M=1; 
 
-    fileID = fopen('parameters.txt','r');
-    tmp=fscanf(fileID,'%f %f %f %f %f %f %f %f');
+    fileID = fopen(fullfile(file_path,'parameters.bin')); 
+    tmp=fread(fileID,'double');
+    parameters=permute(reshape(tmp, 8, []),[2,1]);
     fclose(fileID);
-    parameters=permute(reshape(tmp, 8, 10),[2, 1]);
-    parameters=parameters(1,:);
+    M=numel(parameters)/8;
 
     YY=zeros(numel(t),3,M);
     
@@ -102,26 +100,6 @@ function [YY, YYSL, parameters, t]=read_data()
     tmp=fread(fileID,'double');
     tmp=reshape(tmp, [], M);
     YY(:,3,:)=tmp(1:2:end-1,:)+1i*tmp(2:2:end,:);
-    fclose(fileID);
-    
-    YYSL=zeros(numel(t),3,M);
-    
-    fileID = fopen(fullfile(file_path,'XSL.bin')); 
-    tmp=fread(fileID,'double');
-    tmp=reshape(tmp, [], M);
-    YYSL(:,1,:)=tmp(1:2:end-1,:)+1i*tmp(2:2:end,:);
-    fclose(fileID);   
-    
-    fileID = fopen(fullfile(file_path,'YSL.bin')); 
-    tmp=fread(fileID,'double');
-    tmp=reshape(tmp, [], M);
-    YYSL(:,2,:)=tmp(1:2:end-1,:)+1i*tmp(2:2:end,:);
-    fclose(fileID);
-    
-    fileID = fopen(fullfile(file_path,'ZSL.bin')); 
-    tmp=fread(fileID,'double');
-    tmp=reshape(tmp, [], M);
-    YYSL(:,3,:)=tmp(1:2:end-1,:)+1i*tmp(2:2:end,:);
     fclose(fileID);
 
 end
