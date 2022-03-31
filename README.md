@@ -10,7 +10,7 @@ We want to compare different LISA response functions. In particular we want to c
 
 ## 1. Regenerating LDC data
 
-- 'src/ldc_code.c' and 'src/ldc_code.h' replicate the large LDC implementation of FastGB
+- `src/ldc_code.c` and 'src/ldc_code.h' replicate the large LDC implementation of FastGB
 - run 'make' in command line to compile C code --> 'ldc_exe' is generated
 - run './ldc_exe M' to simulate 'M' signals --> TDIs are stored in 'matlab/X.bin', 'matlab/Y.bin', 'matlab/Z.bin'
 
