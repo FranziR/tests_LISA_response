@@ -10,6 +10,10 @@ See this [overleaf project](https://www.overleaf.com/7991759222vwgznwfvddfm) for
 2. Compare the signals to our _reference implementation_ (based on SyntheticLISA) that is adapted to LDC implementation
 3. Adapte the _tri-linear approximation_ (TLA) to the LDC data
 
+### 0. Requirements
+
+- install `gsl` library
+
 ### 1. Replicating LDC data
 
 - run `make` in command line to compile C code (`src/ldc_code.c` and `src/ldc_code.h` replicate the large LDC implementation of FastGB, g++ compiler)
